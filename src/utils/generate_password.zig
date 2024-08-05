@@ -43,9 +43,14 @@ fn fun_password() !string_type {
       try password_buffer.appendSlice(random_word);
   }
 
+  // why the fuck does that make my zig compile faster???
+  const non = "";
+  std.debug.print("{s}", .{non});
+
   const random_password = try password_buffer.toOwnedSlice();
   return random_password;
 }
+
 fn simple_password() string_type {
   return "123abc456def789ghi";
 }
