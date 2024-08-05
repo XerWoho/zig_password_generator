@@ -1,0 +1,11 @@
+{
+    "[zig]": {
+      "editor.formatOnSave": false,
+    },
+    "files.associations": {
+      "*.ejs": "html",
+      "*.zig": "zig",
+      "windows.h": "c",
+      "conio.h": "c"
+    }
+}
