@@ -23,6 +23,8 @@ pub fn set_current_options(
       }
       option_iteration += 1;
     }
+
+    try terminal.terminal_view();
 }
 
 pub fn main() !void {
@@ -33,15 +35,6 @@ pub fn main() !void {
     const ctrl: string_type = "Ctrl + C (q), to exit the screen.\n\n\n";
     try terminal.terminal_data_append(ctrl);
 
-    // run the terminal viewer
-    const thread = try std.Thread.spawn(
-      .{},
-      run_teriminal_view,
-      .{&terminal}
-    );
-    defer thread.join();
-
-
     const title: string_type = "What kind of password do you want?.\n\n";
     try terminal.terminal_data_append(title);
 
@@ -51,7 +44,7 @@ pub fn main() !void {
       &terminal
     );
 
-
+    try terminal.terminal_view();
     while(true) {
       const down: string_type = "down";
       const up: string_type = "up";
@@ -94,6 +87,8 @@ pub fn main() !void {
     }
 
     try terminal.remove_from_end(0);
+    try terminal.terminal_view();
+
     std.time.sleep(std.time.ns_per_ms * 500);
     std.debug.print(
       "Option: {s} was selected\nGenerating password.\n\n",
@@ -108,11 +103,6 @@ pub fn main() !void {
 
     std.debug.print("\nThanks for using us!\n", .{});
     std.process.exit(1);
-}
-
-pub fn run_teriminal_view(terminal_view: *terminal_viewer) !void {
-  std.debug.print("Starting event loop\n", .{});
-  try terminal_view.terminal_view();
 }
 
 const terminal_viewer = struct {
@@ -159,30 +149,28 @@ const terminal_viewer = struct {
 
 
     pub fn terminal_view(self: *terminal_viewer) !void {
-        while(true) {
-          const check_diff = try self.check_difference();
-          if(check_diff) continue;
+        const check_diff = try self.check_difference();
+        if(check_diff) return;
 
-          const stdout = std.io.getStdOut().writer();
+        const stdout = std.io.getStdOut().writer();
 
-          // clear the screen and re-print the terminal state
-          try stdout.writeAll("\x1b[2J\x1b[H");
-          for (self.terminal_data.items) |item| {
-              try stdout.print("{s}", .{item});
-          }
-
-          // set the last used terminal data to the current terminal data
-          var temp_terminal_data = std.ArrayList(string_type).init(self.last_terminal_data.allocator);
-          try temp_terminal_data.appendSlice(self.terminal_data.items);
-          self.last_terminal_data.deinit();
-          self.last_terminal_data = temp_terminal_data;
-
-
-          // break before going to next check
-          std.time.sleep(
-            std.time.ns_per_s * 0.5
-          );
+        // clear the screen and re-print the terminal state
+        try stdout.writeAll("\x1b[2J\x1b[H");
+        for (self.terminal_data.items) |item| {
+            try stdout.print("{s}", .{item});
         }
+
+        // set the last used terminal data to the current terminal data
+        var temp_terminal_data = std.ArrayList(string_type).init(self.last_terminal_data.allocator);
+        try temp_terminal_data.appendSlice(self.terminal_data.items);
+        self.last_terminal_data.deinit();
+        self.last_terminal_data = temp_terminal_data;
+
+
+        // break before going to next check
+        std.time.sleep(
+          std.time.ns_per_s * 0.5
+        );
         return;
     }
 
