@@ -24,7 +24,7 @@ pub fn generate_password(
 }
 
 fn fun_password() !string_type {
-  const path: string_type = "src/utils/security/1000_common_words.txt";
+  const path: string_type = "src/utils/file/1000_common_words.txt";
   const all_words = try read_file_lines(path);
 
   const now: u64 = @intCast(std.time.milliTimestamp());
